@@ -1,0 +1,659 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Milo — ACQ AI Employee Demo</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;500;600;800&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --acq-sambucus: #131628;
+    --acq-electric-indigo: #6f00ff;
+    --acq-lavender: #a08bec;
+    --acq-white: #ffffff;
+    --acq-silver: #d1d1d1;
+    --acq-silver-bg: #f4f3f7;
+    --font-heading: "Poppins", "Arial Black", Arial, sans-serif;
+    --font-body: "Poppins", Arial, sans-serif;
+    --font-accent: "Poppins", Arial, sans-serif;
+  }
+
+  * { box-sizing: border-box; }
+  html, body {
+    margin: 0;
+    padding: 0;
+    height: 100%;
+    font-family: var(--font-body);
+    font-weight: 300;
+    background: var(--acq-silver-bg);
+    color: var(--acq-sambucus);
+    overflow: hidden;
+  }
+
+  .app {
+    display: flex;
+    height: 100vh;
+    max-width: 1180px;
+    margin: 0 auto;
+    background: var(--acq-white);
+    box-shadow: 0 0 60px rgba(19,22,40,0.08);
+  }
+
+  /* ---------- Sidebar ---------- */
+  .sidebar {
+    width: 280px;
+    min-width: 280px;
+    background: var(--acq-sambucus);
+    color: var(--acq-white);
+    display: flex;
+    flex-direction: column;
+    padding: 28px 22px;
+  }
+
+  .brand {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 34px;
+  }
+
+  .brand-mark {
+    width: 26px;
+    height: 26px;
+    flex-shrink: 0;
+  }
+
+  .brand-word {
+    font-family: var(--font-heading);
+    font-weight: 800;
+    font-size: 13px;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: var(--acq-white);
+  }
+
+  .brand-word span { color: var(--acq-lavender); }
+
+  .profile-card {
+    background: rgba(255,255,255,0.05);
+    border: 1px solid rgba(255,255,255,0.1);
+    border-radius: 10px;
+    padding: 16px;
+    margin-bottom: 28px;
+  }
+
+  .profile-avatar {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, var(--acq-electric-indigo), var(--acq-lavender));
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-family: var(--font-heading);
+    font-weight: 800;
+    font-size: 15px;
+    color: var(--acq-white);
+    margin-bottom: 10px;
+  }
+
+  .profile-name {
+    font-family: var(--font-accent);
+    font-weight: 600;
+    font-size: 14px;
+    margin-bottom: 2px;
+  }
+
+  .profile-role {
+    font-size: 12px;
+    color: var(--acq-silver);
+    font-weight: 300;
+    margin-bottom: 12px;
+  }
+
+  .day-label {
+    display: flex;
+    justify-content: space-between;
+    font-size: 10px;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: var(--acq-lavender);
+    font-family: var(--font-accent);
+    font-weight: 600;
+    margin-bottom: 6px;
+  }
+
+  .progress-track {
+    height: 4px;
+    background: rgba(255,255,255,0.12);
+    border-radius: 2px;
+    overflow: hidden;
+  }
+
+  .progress-fill {
+    height: 100%;
+    width: 3%;
+    background: var(--acq-electric-indigo);
+    border-radius: 2px;
+    transition: width 1.4s ease;
+  }
+
+  .section-label {
+    font-family: var(--font-accent);
+    font-weight: 600;
+    font-size: 10px;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--acq-silver);
+    margin-bottom: 12px;
+  }
+
+  .tool-list {
+    list-style: none;
+    margin: 0 0 auto 0;
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 11px;
+  }
+
+  .tool-item {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-size: 13px;
+    font-weight: 300;
+    color: rgba(255,255,255,0.55);
+    transition: color 0.3s ease;
+  }
+
+  .tool-item.connected { color: var(--acq-white); }
+
+  .tool-check {
+    width: 16px;
+    height: 16px;
+    border-radius: 50%;
+    border: 1.5px solid rgba(255,255,255,0.3);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    transition: all 0.3s ease;
+  }
+
+  .tool-item.connected .tool-check {
+    background: var(--acq-electric-indigo);
+    border-color: var(--acq-electric-indigo);
+  }
+
+  .tool-check svg {
+    width: 9px;
+    height: 9px;
+    opacity: 0;
+    transition: opacity 0.2s ease;
+  }
+
+  .tool-item.connected .tool-check svg { opacity: 1; }
+
+  .sidebar-footer {
+    font-size: 11px;
+    color: rgba(255,255,255,0.35);
+    font-weight: 300;
+    padding-top: 18px;
+    border-top: 1px solid rgba(255,255,255,0.08);
+    margin-top: 18px;
+  }
+
+  /* ---------- Main panel ---------- */
+  .main {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    min-width: 0;
+  }
+
+  .main-header {
+    padding: 20px 30px;
+    border-bottom: 1px solid #ececec;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+
+  .main-title {
+    font-family: var(--font-heading);
+    font-weight: 800;
+    font-size: 15px;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+  }
+
+  .main-sub {
+    font-size: 12px;
+    color: #8a8a94;
+    font-weight: 300;
+    margin-top: 3px;
+  }
+
+  .status-pill {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-family: var(--font-accent);
+    font-weight: 600;
+    font-size: 10px;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    color: var(--acq-electric-indigo);
+    background: rgba(111,0,255,0.08);
+    padding: 6px 12px;
+    border-radius: 20px;
+  }
+
+  .status-dot {
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: var(--acq-electric-indigo);
+    animation: pulse 1.6s infinite;
+  }
+
+  @keyframes pulse {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.35; }
+  }
+
+  .chat-area {
+    flex: 1;
+    overflow-y: auto;
+    padding: 26px 30px;
+    display: flex;
+    flex-direction: column;
+    gap: 18px;
+  }
+
+  .msg-row { display: flex; gap: 12px; max-width: 76%; }
+  .msg-row.user { align-self: flex-end; flex-direction: row-reverse; }
+  .msg-row.ai { align-self: flex-start; }
+
+  .avatar {
+    width: 30px;
+    height: 30px;
+    border-radius: 50%;
+    flex-shrink: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-family: var(--font-heading);
+    font-weight: 800;
+    font-size: 11px;
+    color: var(--acq-white);
+  }
+
+  .msg-row.user .avatar { background: var(--acq-sambucus); }
+  .msg-row.ai .avatar { background: var(--acq-electric-indigo); }
+
+  .bubble {
+    padding: 13px 16px;
+    border-radius: 12px;
+    font-size: 14px;
+    line-height: 1.6;
+    font-weight: 300;
+  }
+
+  .msg-row.user .bubble {
+    background: var(--acq-sambucus);
+    color: var(--acq-white);
+    border-top-right-radius: 3px;
+  }
+
+  .msg-row.ai .bubble {
+    background: var(--acq-silver-bg);
+    color: var(--acq-sambucus);
+    border-top-left-radius: 3px;
+  }
+
+  .bubble ul { margin: 6px 0 0 0; padding-left: 18px; }
+  .bubble li { margin-bottom: 4px; }
+
+  .source-tag {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    margin-top: 9px;
+    font-family: var(--font-accent);
+    font-weight: 600;
+    font-size: 10px;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    color: var(--acq-lavender);
+  }
+
+  .source-tag::before {
+    content: "";
+    width: 5px;
+    height: 5px;
+    border-radius: 50%;
+    background: var(--acq-lavender);
+  }
+
+  .typing-row { align-self: flex-start; display: flex; gap: 12px; max-width: 76%; }
+  .typing-bubble {
+    background: var(--acq-silver-bg);
+    border-radius: 12px;
+    border-top-left-radius: 3px;
+    padding: 15px 18px;
+    display: flex;
+    gap: 4px;
+    align-items: center;
+  }
+  .typing-dot {
+    width: 6px; height: 6px; border-radius: 50%;
+    background: var(--acq-lavender);
+    animation: bounce 1.2s infinite ease-in-out;
+  }
+  .typing-dot:nth-child(2) { animation-delay: 0.15s; }
+  .typing-dot:nth-child(3) { animation-delay: 0.3s; }
+  @keyframes bounce {
+    0%, 60%, 100% { transform: translateY(0); opacity: 0.5; }
+    30% { transform: translateY(-4px); opacity: 1; }
+  }
+
+  /* ---------- Suggested chips + input ---------- */
+  .composer {
+    border-top: 1px solid #ececec;
+    padding: 16px 30px 22px;
+  }
+
+  .chips {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+    margin-bottom: 14px;
+  }
+
+  .chip {
+    font-family: var(--font-accent);
+    font-weight: 600;
+    font-size: 11.5px;
+    letter-spacing: 0.01em;
+    background: var(--acq-white);
+    border: 1px solid var(--acq-silver);
+    color: var(--acq-sambucus);
+    padding: 8px 14px;
+    border-radius: 20px;
+    cursor: pointer;
+    transition: all 0.15s ease;
+  }
+
+  .chip:hover {
+    border-color: var(--acq-electric-indigo);
+    color: var(--acq-electric-indigo);
+  }
+
+  .chip:disabled {
+    opacity: 0.3;
+    cursor: default;
+  }
+
+  .chip:disabled:hover {
+    border-color: var(--acq-silver);
+    color: var(--acq-sambucus);
+  }
+
+  .input-row {
+    display: flex;
+    gap: 10px;
+  }
+
+  .input-row input {
+    flex: 1;
+    border: 1.5px solid var(--acq-silver);
+    border-radius: 10px;
+    padding: 13px 16px;
+    font-family: var(--font-body);
+    font-weight: 300;
+    font-size: 14px;
+    color: var(--acq-sambucus);
+    outline: none;
+    transition: border-color 0.15s ease;
+  }
+
+  .input-row input:focus { border-color: var(--acq-electric-indigo); }
+
+  .send-btn {
+    font-family: var(--font-accent);
+    font-weight: 600;
+    font-size: 12px;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    background: var(--acq-electric-indigo);
+    color: var(--acq-white);
+    border: none;
+    padding: 0 22px;
+    border-radius: 10px;
+    cursor: pointer;
+    transition: opacity 0.15s ease;
+  }
+
+  .send-btn:hover { opacity: 0.85; }
+
+  .hint {
+    text-align: center;
+    font-size: 10.5px;
+    color: #b5b5bd;
+    margin-top: 10px;
+    font-weight: 300;
+  }
+</style>
+</head>
+<body>
+
+<div class="app">
+
+  <!-- SIDEBAR -->
+  <div class="sidebar">
+    <div class="brand">
+      <svg class="brand-mark" viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <path d="M50 6 L92 82 L8 82 Z" stroke="#a08bec" stroke-width="7" stroke-linejoin="round"/>
+      </svg>
+      <div class="brand-word">MILO <span>BY ACQ</span></div>
+    </div>
+
+    <div class="profile-card">
+      <div class="profile-avatar">JL</div>
+      <div class="profile-name">Jordan Lee</div>
+      <div class="profile-role">Sales Associate · Day 1</div>
+      <div class="day-label"><span>90-DAY PLAN</span><span>3%</span></div>
+      <div class="progress-track"><div class="progress-fill" id="progressFill"></div></div>
+    </div>
+
+    <div class="section-label">Connected on day one</div>
+    <ul class="tool-list" id="toolList">
+      <li class="tool-item" data-tool="Slack"><span class="tool-check"><svg viewBox="0 0 24 24" fill="none"><path d="M5 13l4 4L19 7" stroke="white" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg></span>Slack</li>
+      <li class="tool-item" data-tool="Gmail"><span class="tool-check"><svg viewBox="0 0 24 24" fill="none"><path d="M5 13l4 4L19 7" stroke="white" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg></span>Gmail</li>
+      <li class="tool-item" data-tool="Calendar"><span class="tool-check"><svg viewBox="0 0 24 24" fill="none"><path d="M5 13l4 4L19 7" stroke="white" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg></span>Google Calendar</li>
+      <li class="tool-item" data-tool="Asana"><span class="tool-check"><svg viewBox="0 0 24 24" fill="none"><path d="M5 13l4 4L19 7" stroke="white" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg></span>Asana</li>
+      <li class="tool-item" data-tool="HubSpot"><span class="tool-check"><svg viewBox="0 0 24 24" fill="none"><path d="M5 13l4 4L19 7" stroke="white" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg></span>HubSpot</li>
+      <li class="tool-item" data-tool="Benefits Portal"><span class="tool-check"><svg viewBox="0 0 24 24" fill="none"><path d="M5 13l4 4L19 7" stroke="white" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg></span>Benefits Portal</li>
+      <li class="tool-item" data-tool="30/60/90 Plan"><span class="tool-check"><svg viewBox="0 0 24 24" fill="none"><path d="M5 13l4 4L19 7" stroke="white" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg></span>30/60/90 Plan</li>
+    </ul>
+
+    <div class="sidebar-footer">Milo runs on Claude · ACQ AI-First Hackathon</div>
+  </div>
+
+  <!-- MAIN -->
+  <div class="main">
+    <div class="main-header">
+      <div>
+        <div class="main-title">Milo</div>
+        <div class="main-sub">Your AI teammate · already read everything so you don't have to</div>
+      </div>
+      <div class="status-pill"><span class="status-dot"></span>Awake</div>
+    </div>
+
+    <div class="chat-area" id="chatArea">
+      <div class="msg-row ai">
+        <div class="avatar">M</div>
+        <div class="bubble">Hey Jordan, I'm Milo. I spent your first night at ACQ reading your benefits packet, your 30/60/90, and your tool list so you don't have to. Ask me anything, or tap a question below and I'll show off a little.</div>
+      </div>
+    </div>
+
+    <div class="composer">
+      <div class="chips" id="chips">
+        <button class="chip" data-q="deductible">What's my health insurance deductible?</button>
+        <button class="chip" data-q="week">What should I focus on this week?</button>
+        <button class="chip" data-q="tools">How do I get access to my tools?</button>
+        <button class="chip" data-q="expense">Can you summarize the expense policy?</button>
+        <button class="chip" data-q="pto">Who handles PTO questions?</button>
+      </div>
+      <div class="input-row">
+        <input type="text" id="textInput" placeholder="Try one of the questions above, or type your own...">
+        <button class="send-btn" id="sendBtn">Send</button>
+      </div>
+      <div class="hint">Demo build. Milo's responses are scripted from sample onboarding documents to show the intended experience.</div>
+    </div>
+  </div>
+
+</div>
+
+<script>
+  const responses = {
+    deductible: {
+      q: "What's my health insurance deductible?",
+      a: "You're on the ACQ PPO Base plan. Your individual deductible is $1,500 a year, and it resets every January. Once you hit that, ACQ covers 80% of in-network care. Your first premium deduction shows up on Friday's paycheck.",
+      source: "ACQ Benefits Guide, 2026"
+    },
+    week: {
+      q: "What should I focus on this week?",
+      a: "Week one on your 30/60/90 is about access and context, not output. Three things to close by Friday:<ul><li>Finish the CRM certification module</li><li>Sit in on two live sales calls with your mentor</li><li>Submit your territory notes to your manager</li></ul>Nothing on your plan asks for a closed deal yet. That starts week three.",
+      source: "Jordan Lee's 30/60/90 Plan"
+    },
+    tools: {
+      q: "How do I get access to my tools?",
+      a: "You need 9 tools total. 6 are already set up: Slack, Gmail, Google Calendar, Asana, HubSpot, and the Benefits Portal. 3 still need action:<ul><li>Salesloft — IT ticket is filed, expect access by Wednesday</li><li>Shared Sales Drive — ask your manager to add you</li><li>Company VPN — setup steps are in your inbox</li></ul>",
+      source: "IT Onboarding Checklist"
+    },
+    expense: {
+      q: "Can you summarize the expense policy?",
+      a: "Here's the short version:<ul><li>Under $75 doesn't need pre-approval. Submit the receipt in Ramp within 30 days.</li><li>Client meals need the client's name and company in the note.</li><li>Flights and hotels over $500 need manager approval before you book, not after.</li></ul>",
+      source: "Expense Policy, v3"
+    },
+    pto: {
+      q: "Who handles PTO questions?",
+      a: "You don't need to track anyone down for this. You get 15 PTO days in your first year, prorated from your start date, which gives you 11 available right now. Request time off in the HR portal at least 5 business days ahead for anything over 2 days.",
+      source: "HR FAQ"
+    }
+  };
+
+  const chatArea = document.getElementById('chatArea');
+  const chips = document.querySelectorAll('.chip');
+  const textInput = document.getElementById('textInput');
+  const sendBtn = document.getElementById('sendBtn');
+
+  function scrollToBottom() {
+    chatArea.scrollTop = chatArea.scrollHeight;
+  }
+
+  function addUserMessage(text) {
+    const row = document.createElement('div');
+    row.className = 'msg-row user';
+    row.innerHTML = `<div class="avatar">JL</div><div class="bubble">${text}</div>`;
+    chatArea.appendChild(row);
+    scrollToBottom();
+  }
+
+  function addTypingIndicator() {
+    const row = document.createElement('div');
+    row.className = 'typing-row';
+    row.id = 'typingRow';
+    row.innerHTML = `<div class="avatar">M</div><div class="typing-bubble"><div class="typing-dot"></div><div class="typing-dot"></div><div class="typing-dot"></div></div>`;
+    chatArea.appendChild(row);
+    scrollToBottom();
+  }
+
+  function removeTypingIndicator() {
+    const row = document.getElementById('typingRow');
+    if (row) row.remove();
+  }
+
+  function addAiMessage(html, source) {
+    const row = document.createElement('div');
+    row.className = 'msg-row ai';
+    row.innerHTML = `<div class="avatar">M</div><div class="bubble">${html}<div class="source-tag">${source}</div></div>`;
+    chatArea.appendChild(row);
+    scrollToBottom();
+  }
+
+  function handleQuestion(key, customText) {
+    const entry = responses[key];
+    const questionText = customText || entry.q;
+    addUserMessage(questionText);
+
+    chips.forEach(c => c.disabled = true);
+
+    setTimeout(() => {
+      addTypingIndicator();
+      setTimeout(() => {
+        removeTypingIndicator();
+        addAiMessage(entry.a, entry.source);
+        chips.forEach(c => c.disabled = false);
+      }, 1100);
+    }, 350);
+  }
+
+  function handleFreeText() {
+    const val = textInput.value.trim();
+    if (!val) return;
+    const lower = val.toLowerCase();
+    let matched = null;
+    if (lower.includes('deduct') || lower.includes('insurance') || lower.includes('health')) matched = 'deductible';
+    else if (lower.includes('week') || lower.includes('focus') || lower.includes('90')) matched = 'week';
+    else if (lower.includes('tool') || lower.includes('access') || lower.includes('login')) matched = 'tools';
+    else if (lower.includes('expense') || lower.includes('reimburs')) matched = 'expense';
+    else if (lower.includes('pto') || lower.includes('vacation') || lower.includes('time off')) matched = 'pto';
+
+    textInput.value = '';
+
+    if (matched) {
+      handleQuestion(matched, val);
+    } else {
+      addUserMessage(val);
+      chips.forEach(c => c.disabled = true);
+      setTimeout(() => {
+        addTypingIndicator();
+        setTimeout(() => {
+          removeTypingIndicator();
+          addAiMessage("I'm only wired up for five topics in this demo: benefits, your weekly focus, tool access, expenses, and PTO. Give me the real documents and I'd actually answer this one instead of dodging it.", "Demo limitation");
+          chips.forEach(c => c.disabled = false);
+        }, 1100);
+      }, 350);
+    }
+  }
+
+  chips.forEach(chip => {
+    chip.addEventListener('click', () => {
+      if (chip.disabled) return;
+      handleQuestion(chip.dataset.q);
+    });
+  });
+
+  sendBtn.addEventListener('click', handleFreeText);
+  textInput.addEventListener('keydown', (e) => {
+    if (e.key === 'Enter') handleFreeText();
+  });
+
+  // Animate tool connections on load
+  window.addEventListener('DOMContentLoaded', () => {
+    const items = document.querySelectorAll('.tool-item');
+    items.forEach((item, i) => {
+      setTimeout(() => item.classList.add('connected'), 300 + i * 220);
+    });
+    setTimeout(() => {
+      document.getElementById('progressFill').style.width = '3%';
+    }, 200);
+  });
+</script>
+
+</body>
+</html>
